@@ -8,3 +8,5 @@ This is a big data attempt to process live match data to keep an update analytic
 2/16/2026-
 First successful api call from Deadlock community API
 Exported data call to a csv file via python and created a google sheets script to begin converting some data to be readable and consumable.
+worked with api dev to spot some bugs.
+emailed prof for rescoping advice.
