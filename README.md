@@ -10,3 +10,8 @@ First successful api call from Deadlock community API
 Exported data call to a csv file via python and created a google sheets script to begin converting some data to be readable and consumable.
 worked with api dev to spot some bugs.
 emailed prof for rescoping advice.
+
+2/24/2026-
+got a test db running using atlas
+modified my existing python api test script to access said db cluster and add data as a collection
+successfully imported csv of hero stats into cluster from python script
