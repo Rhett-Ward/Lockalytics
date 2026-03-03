@@ -15,3 +15,11 @@ emailed prof for rescoping advice.
 got a test db running using atlas
 modified my existing python api test script to access said db cluster and add data as a collection
 successfully imported csv of hero stats into cluster from python script
+
+3/3/2026
+deployed a hadoop hdfs docker container and began learning how to interact with it.
+next steps:
+setup apache spark to stream from api (first iteration might just be making calls on a timer or making a call with pyspark at all)
+Attached HDFS container to AZUR blob storage
+create mongodb atlas instance through azure that is linked to that blob storage
+rewrite project statement
