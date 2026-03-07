@@ -23,3 +23,9 @@ setup apache spark to stream from api (first iteration might just be making call
 Attached HDFS container to AZUR blob storage
 create mongodb atlas instance through azure that is linked to that blob storage
 rewrite project statement
+
+3/6/2026
+made a batch script that connects everything together, has requirements in it, can auto install just about everything (just need docker, npm, and python before hand) and does all the work
+the end result is a hdfs and mongo db cluster that host a csv and a website that pulls from it and is created inside of a node js script. have to figure out how to upload it all to github due to data limits. 
+have to write report still
+have to figure out what can and cant be uploaded (like atlas db key)
