@@ -5,7 +5,7 @@ School project Big Data Deadlock api and meta analytics
 This is a big data attempt to process live amatch data to keep an update analytics website(UI) thats interactable and filterable and provides up to date analysis. It will use HDFS, MongoDB, Apache Spark, and both the steam api and the community made deadlock api.
 
 # "Table of contents"
-- Requirements
+- [Requirements](#Requirements)
 - Setup / Instructions
 - [Progress Reports](#Progress-Reports)
 
@@ -16,6 +16,7 @@ This is a big data attempt to process live amatch data to keep an update analyti
   - [Windows Installer](https://docs.docker.com/desktop/setup/install/windows-install/)
   - [Mac Installer](https://docs.docker.com/desktop/setup/install/mac-install/)
   - [Linux Installer](https://docs.docker.com/desktop/setup/install/linux/)
+- [Mongo DB Instance](https://www.mongodb.com/products/platform/atlas-database) You'll need to set one up if you want to run it yourself. [Step by step guide on setting it up](###Step-4)
 - [Node.js / NPM] It is very likely that you already have NPM installed if your on windows but just in case you dont
  - [Instructions on how to install NPM](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) 
 - [Python3] Its very likely you already have python installed but in case you dont
@@ -24,6 +25,25 @@ This is a big data attempt to process live amatch data to keep an update analyti
  - [Python for Linux](https://www.python.org/downloads/source/) Might be easier to just do `sudo apt install python3` 
 - [Hadoop Zip File]()
 - [Batch File]() If you are willing to run this on your computer you can see everything in action (code is mostly readable even if unknowledgeable, its completely safe but feel free to open it in notepad to check it out)
+
+# Instuctions
+## Here is a step by step guide of how to get it all going
+
+### Step 1
+Download and install all the requirements
+
+### Step 2
+Open Docker Desktop and sign in / create an account if you haven't already
+
+### Step 3
+Make sure you can see this in the bottom left of your docker desktop window
+
+<img src="https://media.discordapp.net/attachments/723371382091546645/1480376147123638424/image.png?ex=69af7339&is=69ae21b9&hm=2a13eff637cd81e5eb9e9825346dd9da79bdf140b5a5bcc54bfe1b63f6b4ecd1&=&format=webp&quality=lossless&width=138&height=30" alt="Engine Running Symbol" width=300 height=300>
+
+### Step 4 
+create a MongoDB Cluster
+
+
 
 # Progress Reports
 
