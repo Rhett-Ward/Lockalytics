@@ -44,35 +44,34 @@ Make sure you can see this in the bottom left of your docker desktop window
 create a MongoDB Cluster (Project used for screenshots was deleted shortly after, password left uncensored since it no longer correlates to anything, this cluster can't be accessed.)
 
 - Step 1
- - Create a free account and sign in
+  - Create a free account and sign in
 - Step 2
- - Create a project
- - <img width="900" height="600" alt="image" src="https://github.com/user-attachments/assets/084f54f2-b237-4174-972a-70e3da7ece91" />
- - <img width="480" height="480" alt="image" src="https://github.com/user-attachments/assets/2abeffe2-3392-43ef-9075-a782ea4899df" />
- - <img width="480" height="480" alt="image" src="https://github.com/user-attachments/assets/8f312098-e13a-4c30-86bf-e369c4f36ea0" />
+  - Create a project
+  - <img width="900" height="600" alt="image" src="https://github.com/user-attachments/assets/084f54f2-b237-4174-972a-70e3da7ece91" />
+  - <img width="480" height="480" alt="image" src="https://github.com/user-attachments/assets/2abeffe2-3392-43ef-9075-a782ea4899df" />
+  - <img width="480" height="480" alt="image" src="https://github.com/user-attachments/assets/8f312098-e13a-4c30-86bf-e369c4f36ea0" />
 - Step 3
- - Create a Cluster
- - <img width="900" height="600" alt="image" src="https://github.com/user-attachments/assets/057e73e3-0f7b-4665-b27c-1a22d84cd379" />
- - <img width="900" height="600" alt="image" src="https://github.com/user-attachments/assets/b9127986-9f78-4b1e-b580-2ade6a08c9ce" />
-  - Provider doesn't matter here
+  - Create a Cluster
+  - <img width="900" height="600" alt="image" src="https://github.com/user-attachments/assets/057e73e3-0f7b-4665-b27c-1a22d84cd379" />
+  - <img width="900" height="600" alt="image" src="https://github.com/user-attachments/assets/b9127986-9f78-4b1e-b580-2ade6a08c9ce" />
+    - Provider doesn't matter here
 - Step 4
- - Connect to your cluster
-  - <img width="480" height="480" alt="image" src="https://github.com/user-attachments/assets/c083a62e-bb83-44e5-b057-6b10aecb8869" />
-  - <img width="480" height="480" alt="image" src="https://github.com/user-attachments/assets/7d893298-e246-468b-bd15-e6a91f306910" />
+  - Connect to your cluster
+    - <img width="480" height="480" alt="image" src="https://github.com/user-attachments/assets/c083a62e-bb83-44e5-b057-6b10aecb8869" />
+    - <img width="480" height="480" alt="image" src="https://github.com/user-attachments/assets/7d893298-e246-468b-bd15-e6a91f306910" />
 - Step 5
- - Copy your connection strings into the appropriate files.
-  - Python
-   - <img width="900" height="600" alt="image" src="https://github.com/user-attachments/assets/73ff6291-4459-48f6-8e6f-b91ba862addf" />
-   - Copy this string into the below segment of ["Testing File.py"]()
-   - <img width="900" height="300" alt="image" src="https://github.com/user-attachments/assets/fc720439-5035-4045-aa5b-1d932a5d626c" />
+  - Copy your connection strings into the appropriate files.
+    - Python
+      - <img width="900" height="600" alt="image" src="https://github.com/user-attachments/assets/73ff6291-4459-48f6-8e6f-b91ba862addf" />
+      - Copy your version of this string into the below segment of ["Testing File.py"]()
+      - <img width="900" height="300" alt="image" src="https://github.com/user-attachments/assets/fc720439-5035-4045-aa5b-1d932a5d626c" />
+    - Node.js
+      - <img width="900" height="600" alt="image" src="https://github.com/user-attachments/assets/17b81e14-61da-4c7c-875c-5a8a54354b88" />
+      - Copy your version of this string into the below segment of "Node.js" inside the [Hadoop Zip File]()
+      - <img width="900" height="300" alt="image" src="https://github.com/user-attachments/assets/5afeb1e8-8d5a-49f2-acfb-92613ce25b8c" />
 
-
-
-
-
-
-
-
+### Step 5
+Run the batch file!
 
 
 # Progress Reports
