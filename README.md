@@ -17,9 +17,9 @@ This is a big data attempt to process live amatch data to keep an update analyti
   - [Mac Installer](https://docs.docker.com/desktop/setup/install/mac-install/)
   - [Linux Installer](https://docs.docker.com/desktop/setup/install/linux/)
 - [Mongo DB Instance](https://www.mongodb.com/products/platform/atlas-database) You'll need to set one up if you want to run it yourself. [Step by step guide on setting it up](###Step-4)
-- [Node.js / NPM] It is very likely that you already have NPM installed if your on windows but just in case you dont
+- Node.js / NPM It is very likely that you already have NPM installed if your on windows but just in case you dont
  - [Instructions on how to install NPM](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) 
-- [Python3] Its very likely you already have python installed but in case you dont
+- Python3 Its very likely you already have python installed but in case you dont
  - [Python for Windows](https://www.python.org/downloads/windows/) Click on the Installer (MSIX) of the most recent stable version
  - [Python for MAC](https://www.python.org/downloads/macos/) Click on the Installer of the most recent stable version
  - [Python for Linux](https://www.python.org/downloads/source/) Might be easier to just do `sudo apt install python3` 
