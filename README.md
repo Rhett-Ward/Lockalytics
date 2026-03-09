@@ -6,7 +6,7 @@ This is a big data attempt to process live amatch data to keep an update analyti
 
 # "Table of contents"
 - [Requirements](#Requirements)
-- Setup / Instructions
+- [Setup / Instructions](#Instructions)
 - [Progress Reports](#Progress-Reports)
 
 
@@ -41,7 +41,37 @@ Make sure you can see this in the bottom left of your docker desktop window
 <img src="https://media.discordapp.net/attachments/723371382091546645/1480376147123638424/image.png?ex=69af7339&is=69ae21b9&hm=2a13eff637cd81e5eb9e9825346dd9da79bdf140b5a5bcc54bfe1b63f6b4ecd1&=&format=webp&quality=lossless&width=138&height=30" alt="Engine Running Symbol" width=300 height=300>
 
 ### Step 4 
-create a MongoDB Cluster
+create a MongoDB Cluster (Project used for screenshots was deleted shortly after, password left uncensored since it no longer correlates to anything, this cluster can't be accessed.)
+
+- Step 1
+ - Create a free account and sign in
+- Step 2
+ - Create a project
+ - <img width="900" height="600" alt="image" src="https://github.com/user-attachments/assets/084f54f2-b237-4174-972a-70e3da7ece91" />
+ - <img width="480" height="480" alt="image" src="https://github.com/user-attachments/assets/2abeffe2-3392-43ef-9075-a782ea4899df" />
+ - <img width="480" height="480" alt="image" src="https://github.com/user-attachments/assets/8f312098-e13a-4c30-86bf-e369c4f36ea0" />
+- Step 3
+ - Create a Cluster
+ - <img width="900" height="600" alt="image" src="https://github.com/user-attachments/assets/057e73e3-0f7b-4665-b27c-1a22d84cd379" />
+ - <img width="900" height="600" alt="image" src="https://github.com/user-attachments/assets/b9127986-9f78-4b1e-b580-2ade6a08c9ce" />
+  - Provider doesn't matter here
+- Step 4
+ - Connect to your cluster
+  - <img width="480" height="480" alt="image" src="https://github.com/user-attachments/assets/c083a62e-bb83-44e5-b057-6b10aecb8869" />
+  - <img width="480" height="480" alt="image" src="https://github.com/user-attachments/assets/7d893298-e246-468b-bd15-e6a91f306910" />
+- Step 5
+ - Copy your connection strings into the appropriate files.
+  - Python
+   - <img width="900" height="600" alt="image" src="https://github.com/user-attachments/assets/73ff6291-4459-48f6-8e6f-b91ba862addf" />
+   - Copy this string into the below segment of ["Testing File.py"]()
+   - <img width="900" height="300" alt="image" src="https://github.com/user-attachments/assets/fc720439-5035-4045-aa5b-1d932a5d626c" />
+
+
+
+
+
+
+
 
 
 
