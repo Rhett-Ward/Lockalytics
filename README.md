@@ -106,3 +106,6 @@ made a batch script that connects everything together, has requirements in it, c
 the end result is a hdfs and mongo db cluster that host a csv and a website that pulls from it and is created inside of a node js script. have to figure out how to upload it all to github due to data limits. 
 have to write report still
 have to figure out what can and cant be uploaded (like atlas db key)
+
+3/8/2026
+Finished Initial implementation report. Did read me write up. Refactored batch file to run for anyone and not use specifics for my pc.
