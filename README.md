@@ -71,8 +71,14 @@ create a MongoDB Cluster (Project used for screenshots was deleted shortly after
       - <img width="900" height="300" alt="image" src="https://github.com/user-attachments/assets/5afeb1e8-8d5a-49f2-acfb-92613ce25b8c" />
 
 ### Step 5
+Edit the directory of the virtual environment in the batch file
+
+<img width="1016" height="53" alt="image" src="https://github.com/user-attachments/assets/b56d53cb-6369-47c0-9c5d-e2a02ee84cf8" />
+
+### Step 6
 Run the batch file!
 
+Run it multiple times over a few minutes to see proof that the html file is actually pulling _id from your cluster
 
 # Progress Reports
 
