@@ -4,6 +4,28 @@ School project Big Data Deadlock api and meta analytics
 
 This is a big data attempt to process live amatch data to keep an update analytics website(UI) thats interactable and filterable and provides up to date analysis. It will use HDFS, MongoDB, Apache Spark, and both the steam api and the community made deadlock api.
 
+# "Table of contents"
+- Requirements
+- Setup / Instructions
+- [Progress Reports](#Progress-Reports)
+
+
+# Requirements
+
+- [Docker Desktop](https://docs.docker.com/desktop/) Needed for deploying the HDFS server
+  - [Windows Installer](https://docs.docker.com/desktop/setup/install/windows-install/)
+  - [Mac Installer](https://docs.docker.com/desktop/setup/install/mac-install/)
+  - [Linux Installer](https://docs.docker.com/desktop/setup/install/linux/)
+- [Node.js / NPM] It is very likely that you already have NPM installed if your on windows but just in case you dont
+ - [Instructions on how to install NPM](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) 
+- [Python3] Its very likely you already have python installed but in case you dont
+ - [Python for Windows](https://www.python.org/downloads/windows/) Click on the Installer (MSIX) of the most recent stable version
+ - [Python for MAC](https://www.python.org/downloads/macos/) Click on the Installer of the most recent stable version
+ - [Python for Linux](https://www.python.org/downloads/source/) Might be easier to just do `sudo apt install python3` 
+- [Hadoop Zip File]()
+- [Batch File]() If you are willing to run this on your computer you can see everything in action (code is mostly readable even if unknowledgeable, its completely safe but feel free to open it in notepad to check it out)
+
+# Progress Reports
 
 2/16/2026-
 First successful api call from Deadlock community API
