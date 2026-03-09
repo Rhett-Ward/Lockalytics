@@ -23,8 +23,8 @@ This is a big data attempt to process live amatch data to keep an update analyti
  - [Python for Windows](https://www.python.org/downloads/windows/) Click on the Installer (MSIX) of the most recent stable version
  - [Python for MAC](https://www.python.org/downloads/macos/) Click on the Installer of the most recent stable version
  - [Python for Linux](https://www.python.org/downloads/source/) Might be easier to just do `sudo apt install python3` 
-- [Hadoop Zip File]()
-- [Batch File]() If you are willing to run this on your computer you can see everything in action (code is mostly readable even if unknowledgeable, its completely safe but feel free to open it in notepad to check it out)
+- [Hadoop Zip File](https://github.com/Rhett-Ward/Lockalytics/blob/8e126bdee4f8e16646d5d8667e53285cb9bf8f33/src/Hadoop%20HDFS.zip)
+- Batch File - If you are willing to run this on your computer you can see everything in action (code is mostly readable even if unknowledgeable, its completely safe but feel free to open it in notepad to check it out)
 
 # Instuctions
 ## Here is a step by step guide of how to get it all going
@@ -63,11 +63,11 @@ create a MongoDB Cluster (Project used for screenshots was deleted shortly after
   - Copy your connection strings into the appropriate files.
     - Python
       - <img width="900" height="600" alt="image" src="https://github.com/user-attachments/assets/73ff6291-4459-48f6-8e6f-b91ba862addf" />
-      - Copy your version of this string into the below segment of ["Testing File.py"]()
+      - Copy your version of this string into the below segment of "Testing File.py"
       - <img width="900" height="300" alt="image" src="https://github.com/user-attachments/assets/fc720439-5035-4045-aa5b-1d932a5d626c" />
     - Node.js
       - <img width="900" height="600" alt="image" src="https://github.com/user-attachments/assets/17b81e14-61da-4c7c-875c-5a8a54354b88" />
-      - Copy your version of this string into the below segment of "Node.js" inside the [Hadoop Zip File]()
+      - Copy your version of this string into the below segment of "Node.js" inside the [Hadoop Zip File](https://github.com/Rhett-Ward/Lockalytics/blob/8e126bdee4f8e16646d5d8667e53285cb9bf8f33/src/Hadoop%20HDFS.zip)
       - <img width="900" height="300" alt="image" src="https://github.com/user-attachments/assets/5afeb1e8-8d5a-49f2-acfb-92613ce25b8c" />
 
 ### Step 5
