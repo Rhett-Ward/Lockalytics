@@ -114,4 +114,6 @@ Finished Initial implementation report. Did read me write up. Refactored batch f
 Beginning full transitional process to automation and fully online hosting.
 Purchased server to host the python script, the web app, the mongodb
 Setup Azure blob storage to be the HDFS moving away from docker
+Setup self hosted mongodb instance as opposed to using Atlas for size and cost reasons.
+
 
