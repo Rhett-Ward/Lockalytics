@@ -109,3 +109,9 @@ have to figure out what can and cant be uploaded (like atlas db key)
 
 3/8/2026
 Finished Initial implementation report. Did read me write up. Refactored batch file to run for anyone and not use specifics for my pc.
+
+3/19/2026
+Beginning full transitional process to automation and fully online hosting.
+Purchased server to host the python script, the web app, the mongodb
+Setup Azure blob storage to be the HDFS moving away from docker
+
