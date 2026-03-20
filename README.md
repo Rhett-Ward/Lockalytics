@@ -117,5 +117,6 @@ Setup Azure blob storage to be the HDFS moving away from docker
 Setup self hosted mongodb instance as opposed to using Atlas for size and cost reasons.
 worked through lots of debugging. Got first set of raw data into Azure container.
 got a sample express server up and running as a tester. 
-
+started working on spark implementation in order to process data out of azure and into the self hosted mongodb instance.
+started reworking python fetch script. to do: change dump location to azure blob rather then to mongo DB
 
