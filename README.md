@@ -115,5 +115,7 @@ Beginning full transitional process to automation and fully online hosting.
 Purchased server to host the python script, the web app, the mongodb
 Setup Azure blob storage to be the HDFS moving away from docker
 Setup self hosted mongodb instance as opposed to using Atlas for size and cost reasons.
+worked through lots of debugging. Got first set of raw data into Azure container.
+got a sample express server up and running as a tester. 
 
 
