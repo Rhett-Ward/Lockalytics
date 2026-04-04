@@ -120,3 +120,8 @@ got a sample express server up and running as a tester.
 started working on spark implementation in order to process data out of azure and into the self hosted mongodb instance.
 started reworking python fetch script. to do: change dump location to azure blob rather then to mongo DB
 
+4/4/2026
+Completely debugged spark test pipeline thing. Was able to properly prove transfer into mongodb and from there into azure.
+
+
+
