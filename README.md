@@ -124,5 +124,9 @@ started reworking python fetch script. to do: change dump location to azure blob
 Completely debugged spark test pipeline thing. Was able to properly prove transfer into mongodb and from there into azure.
 These issues included but not limited to: Running system python instead of venv python instance and therefore missing dependencies, Misspelled credentials, poor file search.
 
+04/05/2026
+Refactoring github to prepare for full upload of project and submission.
+Changing python fetch and store script to fetch and store many api calls at once rather then just one (functionality tested across the board just needs to be implemented together)
+
 
 
