@@ -140,9 +140,7 @@ Runs through all 6 phases and logs `OK`, `SKIP`, or `FAIL` per endpoint to stdou
 ### Spark
 
 ```bash
-spark-submit \
-  --packages org.mongodb.spark:mongo-spark-connector_2.12:10.3.0 \
-  spark_process.py
+spark-submit --driver-memory 4g --conf spark.sql.shuffle.partitions=10 --packages org.mongodb.spark:mongo-spark-connector_2.12:10.3.0 spark_process.py
 ```
 
 <img width="770" height="650" alt="image" src="https://github.com/user-attachments/assets/07584bda-1fdc-4f45-aeb7-cd725f778ce8" />
@@ -244,13 +242,8 @@ lockalytics/
 ├── spark_process1.py       # Spark processing script
 ├── server1.js              # Express web server
 ├── heroes1.html            # Dashboard
-├── .env                    # Credentials (not committed)
-├── .env.example            # Template
 ├── requirements.txt        # Python deps
 ├── package.json            # Node deps
-└── logs/
-    ├── ingest.log
-    └── spark.log
 ```
 
 ---
