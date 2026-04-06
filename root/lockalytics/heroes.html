@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lockalytics — Deadlock Analytics</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #0b0d12;
+      color: #e2e8f0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Top bar ─────────────────────────────────────────────────────────── */
+    .topbar {
+      background: #0f1117;
+      border-bottom: 1px solid #1e2130;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 52px;
+      flex-shrink: 0;
+    }
+
+    .logo { font-size: 1.25rem; font-weight: 700; color: #f8fafc; letter-spacing: -0.5px; }
+    .logo span { color: #f97316; }
+
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 0.78rem;
+      color: #64748b;
+    }
+
+    .dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: #22c55e;
+      animation: pulse 2s infinite;
+    }
+    .dot.loading { background: #f59e0b; animation: none; }
+    .dot.error   { background: #ef4444; animation: none; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
+
+    /* ── Layout ──────────────────────────────────────────────────────────── */
+    .layout {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+      height: calc(100vh - 52px);
+    }
+
+    /* ── Sidebar ─────────────────────────────────────────────────────────── */
+    .sidebar {
+      width: 210px;
+      flex-shrink: 0;
+      background: #0f1117;
+      border-right: 1px solid #1e2130;
+      overflow-y: auto;
+      padding: 0.75rem 0;
+    }
+
+    .sidebar-group { margin-bottom: 0.25rem; }
+
+    .sidebar-label {
+      padding: 0.4rem 1rem 0.25rem;
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: #475569;
+    }
+
+    .sidebar-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.35rem 1rem;
+      font-size: 0.82rem;
+      color: #94a3b8;
+      cursor: pointer;
+      border-left: 2px solid transparent;
+      transition: all 0.1s;
+      gap: 0.4rem;
+    }
+    .sidebar-item:hover { background: #1e2130; color: #e2e8f0; }
+    .sidebar-item.active {
+      background: #1e2130;
+      color: #f97316;
+      border-left-color: #f97316;
+    }
+
+    .sidebar-count {
+      font-size: 0.68rem;
+      color: #334155;
+      white-space: nowrap;
+    }
+    .sidebar-item.active .sidebar-count { color: #7c3aed; }
+
+    /* ── Main content ────────────────────────────────────────────────────── */
+    .main {
+      flex: 1;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      padding: 1.25rem 1.5rem;
+      gap: 1rem;
+    }
+
+    .view-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    .view-title {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: #f8fafc;
+    }
+    .view-subtitle { font-size: 0.78rem; color: #475569; margin-top: 1px; }
+
+    /* ── Controls ────────────────────────────────────────────────────────── */
+    .controls {
+      display: flex;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .controls input, .controls select {
+      background: #1e2130;
+      border: 1px solid #334155;
+      color: #e2e8f0;
+      padding: 0.35rem 0.65rem;
+      border-radius: 5px;
+      font-size: 0.82rem;
+      outline: none;
+    }
+    .controls input:focus, .controls select:focus { border-color: #f97316; }
+    .controls input { width: 180px; }
+
+    .btn {
+      background: #1e2130;
+      border: 1px solid #334155;
+      color: #94a3b8;
+      padding: 0.35rem 0.75rem;
+      border-radius: 5px;
+      font-size: 0.82rem;
+      cursor: pointer;
+      transition: all 0.1s;
+    }
+    .btn:hover { border-color: #475569; color: #e2e8f0; }
+    .btn:disabled { opacity: 0.35; cursor: default; }
+    .btn.primary { background: #f97316; border-color: #f97316; color: #fff; }
+    .btn.primary:hover { background: #ea6c0a; }
+
+    /* ── Hero selector ───────────────────────────────────────────────────── */
+    .hero-selector {
+      background: #1e2130;
+      border: 1px solid #334155;
+      color: #e2e8f0;
+      padding: 0.35rem 0.65rem;
+      border-radius: 5px;
+      font-size: 0.82rem;
+      outline: none;
+      min-width: 160px;
+    }
+    .hero-selector:focus { border-color: #f97316; }
+
+    /* ── Table ───────────────────────────────────────────────────────────── */
+    .table-wrapper {
+      flex: 1;
+      overflow: auto;
+      border-radius: 7px;
+      border: 1px solid #1e2130;
+    }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+
+    thead th {
+      background: #131620;
+      position: sticky;
+      top: 0;
+      padding: 0.6rem 0.9rem;
+      text-align: left;
+      font-weight: 600;
+      color: #64748b;
+      text-transform: uppercase;
+      font-size: 0.69rem;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+      cursor: pointer;
+      user-select: none;
+      border-bottom: 1px solid #1e2130;
+      z-index: 1;
+    }
+    thead th:hover { color: #94a3b8; }
+    thead th.sorted { color: #f97316; }
+    thead th.sorted::after { content: ' ▾'; }
+    thead th.sorted.asc::after { content: ' ▴'; }
+
+    tbody tr { border-bottom: 1px solid #131620; transition: background 0.08s; }
+    tbody tr:hover { background: #141720; }
+    tbody tr:last-child { border-bottom: none; }
+
+    td {
+      padding: 0.55rem 0.9rem;
+      color: #94a3b8;
+      white-space: nowrap;
+      max-width: 280px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    td:first-child { color: #e2e8f0; font-weight: 500; }
+
+    .wr-cell { display: flex; align-items: center; gap: 0.5rem; }
+    .wr-bar-bg {
+      width: 80px; height: 5px;
+      background: #1e2130;
+      border-radius: 3px;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .wr-bar { height: 100%; border-radius: 3px; }
+    .wr-high { background: #22c55e; }
+    .wr-mid  { background: #f59e0b; }
+    .wr-low  { background: #ef4444; }
+
+    /* ── Pagination ──────────────────────────────────────────────────────── */
+    .pagination {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.8rem;
+      color: #475569;
+      flex-shrink: 0;
+    }
+    .page-info { min-width: 120px; text-align: center; }
+
+    /* ── States ──────────────────────────────────────────────────────────── */
+    .state-msg {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: #334155;
+      font-size: 0.9rem;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .state-msg .big { font-size: 2rem; }
+
+    .needs-filter {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      gap: 0.75rem;
+      color: #475569;
+      font-size: 0.88rem;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Top bar ─────────────────────────────────────────────────────────── -->
+  <div class="topbar">
+    <div class="logo">Locka<span>lytics</span></div>
+    <div class="status">
+      <div class="dot loading" id="status-dot"></div>
+      <span id="status-text">Connecting...</span>
+    </div>
+  </div>
+
+  <div class="layout">
+
+    <!-- ── Sidebar ───────────────────────────────────────────────────────── -->
+    <nav class="sidebar" id="sidebar">
+      <div class="state-msg" style="padding:1rem;font-size:.75rem;">Loading...</div>
+    </nav>
+
+    <!-- ── Main ──────────────────────────────────────────────────────────── -->
+    <div class="main" id="main-content">
+      <div class="state-msg">
+        <span class="big">◈</span>
+        <span>Select a collection from the left</span>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // ── Hero name map ─────────────────────────────────────────────────────
+    const HERO_NAMES = {
+      1:"Infernus",2:"Seven",3:"Vindicta",4:"Lady Geist",6:"Abrams",
+      7:"Wraith",8:"McGinnis",10:"Paradox",11:"Dynamo",12:"Kelvin",
+      13:"Haze",14:"Holliday",15:"Bebop",16:"Calico",17:"Grey Talon",
+      18:"Mo & Krill",19:"Shiv",20:"Ivy",21:"Kali",25:"Warden",
+      27:"Yamato",31:"Lash",35:"Viscous",38:"Gunslinger",39:"The Boss",
+      47:"Tokamak",48:"Wrecker",49:"Rutger",50:"Pocket",51:"Thumper",
+      52:"Mirage",53:"Fathom",54:"Cadence",56:"Bomber",57:"Shield Guy",
+      58:"Vyper",59:"Vandal",60:"Sinclair",61:"Trapper",62:"Raven",
+      63:"Mina",64:"Drifter",65:"Venator",66:"Victor",67:"Paige",
+      68:"Boho",69:"The Doorman",70:"Skyrunner",71:"Swan",72:"Billy",
+      73:"Druid",74:"Graf",75:"Fortuna",76:"Graves",77:"Apollo",
+      78:"Airheart",79:"Rem",80:"Silver",81:"Celeste",82:"Opera"
+    };
+
+    function heroName(id) {
+      return HERO_NAMES[id] ? HERO_NAMES[id] : (id != null ? `Hero ${id}` : "—");
+    }
+
+    // Any column whose name is exactly 'hero_id' or ends with '_hero_id' gets
+    // resolved to a hero name. Catches counter_hero_id, synergy_hero_id, etc.
+    function isHeroIdCol(key) {
+      return key === "hero_id" || key.endsWith("_hero_id");
+    }
+
+    // Nicer display labels for common field names
+    const COL_LABELS = {
+      hero_id:"Hero", counter_hero_id:"Counter Hero", synergy_hero_id:"Synergy Hero",
+      total_wins:"Wins", total_losses:"Losses", total_matches:"Matches",
+      win_rate:"Win Rate", last_updated:"Last Updated", fetched_at:"Fetched At",
+      item_id:"Item ID", account_id:"Account ID", match_id:"Match ID",
+      wins:"Wins", losses:"Losses", matches:"Matches",
+    };
+
+    function colLabel(key) { return COL_LABELS[key] || key.replace(/_/g," ").replace(/\b\w/g,c=>c.toUpperCase()); }
+
+    // ── State ─────────────────────────────────────────────────────────────
+    let collections  = [];
+    let activeView   = null;  // collection name
+    let currentPage  = 1;
+    let totalPages   = 1;
+    let currentSort  = null;
+    let currentOrder = "desc";
+    let currentHeroFilter = null;
+    let heroList = [];  // [{id, name}] populated from hero_stats
+
+    // ── DOM ───────────────────────────────────────────────────────────────
+    const sidebar     = document.getElementById("sidebar");
+    const mainContent = document.getElementById("main-content");
+    const statusDot   = document.getElementById("status-dot");
+    const statusText  = document.getElementById("status-text");
+
+    function setStatus(state, text) {
+      statusDot.className = "dot " + (state === "ok" ? "" : state);
+      statusText.textContent = text;
+    }
+
+    // ── Format helpers ────────────────────────────────────────────────────
+    function fmtNumber(v) {
+      if (v == null) return "—";
+      if (typeof v === "number") return v.toLocaleString();
+      return v;
+    }
+
+    function fmtCell(key, value) {
+      if (value === null || value === undefined) return "—";
+
+      if (isHeroIdCol(key)) return heroName(value);
+
+      if (key === "win_rate") return (value * 100).toFixed(2) + "%";
+
+      if (typeof value === "number" && Math.abs(value) >= 1000) return value.toLocaleString();
+
+      if ((key === "last_updated" || key === "fetched_at") && typeof value === "string") {
+        try { return new Date(value).toLocaleString(); } catch { return value; }
+      }
+
+      if (typeof value === "object") {
+        return JSON.stringify(value).substring(0, 80) + (JSON.stringify(value).length > 80 ? "…" : "");
+      }
+
+      return String(value);
+    }
+
+    function winRateBar(pct) {
+      const cls = pct >= 52 ? "wr-high" : pct >= 48 ? "wr-mid" : "wr-low";
+      return `<div class="wr-cell">
+        <span>${pct.toFixed(2)}%</span>
+        <div class="wr-bar-bg"><div class="wr-bar ${cls}" style="width:${Math.min(pct,100)}%"></div></div>
+      </div>`;
+    }
+
+    // ── Sidebar ───────────────────────────────────────────────────────────
+    function buildSidebar() {
+      const groups = {};
+      for (const c of collections) {
+        // Don't show collections with no data -- either Spark didn't write them
+        // or the endpoint returned nothing. Nothing to display.
+        if (c.count === 0) continue;
+        if (!groups[c.category]) groups[c.category] = [];
+        groups[c.category].push(c);
+      }
+
+      let html = "";
+      for (const [cat, items] of Object.entries(groups)) {
+        html += `<div class="sidebar-group">
+          <div class="sidebar-label">${cat}</div>`;
+        for (const c of items) {
+          const label = c.name.replace(/_/g," ").replace(/\b\w/g,ch=>ch.toUpperCase());
+          const count = c.count >= 1000
+            ? (c.count >= 1_000_000 ? (c.count/1_000_000).toFixed(1)+"M" : (c.count/1000).toFixed(0)+"k")
+            : c.count.toLocaleString();
+          html += `<div class="sidebar-item${activeView===c.name?" active":""}"
+            data-col="${c.name}" onclick="selectCollection('${c.name}')">
+            <span>${label}</span>
+            <span class="sidebar-count">${count}</span>
+          </div>`;
+        }
+        html += `</div>`;
+      }
+      sidebar.innerHTML = html;
+    }
+
+    // ── Hero list for selector ─────────────────────────────────────────────
+    async function loadHeroList() {
+      try {
+        const r = await fetch("/api/heroes?sort=hero_id&order=asc&limit=500");
+        const d = await r.json();
+        if (d.ok) {
+          heroList = d.heroes
+            .map(h => ({ id: h.hero_id, name: heroName(h.hero_id) }))
+            .sort((a,b) => a.name.localeCompare(b.name));
+        }
+      } catch { /* hero list is optional, page still works without it */ }
+    }
+
+    function heroSelectorHTML(selectedId) {
+      let opts = `<option value="">All heroes</option>`;
+      for (const h of heroList) {
+        opts += `<option value="${h.id}"${selectedId==h.id?" selected":""}>${h.name}</option>`;
+      }
+      return `<select class="hero-selector" id="hero-select" onchange="onHeroChange(this.value)">${opts}</select>`;
+    }
+
+    // ── Collection selection ──────────────────────────────────────────────
+    function selectCollection(name) {
+      activeView   = name;
+      currentPage  = 1;
+      currentSort  = null;
+      currentOrder = "desc";
+      currentHeroFilter = null;
+      buildSidebar();
+      renderView();
+    }
+
+    function onHeroChange(val) {
+      currentHeroFilter = val ? parseInt(val) : null;
+      currentPage = 1;
+      fetchAndRender();
+    }
+
+    function onSortClick(field) {
+      if (currentSort === field) {
+        currentOrder = currentOrder === "desc" ? "asc" : "desc";
+      } else {
+        currentSort  = field;
+        currentOrder = "desc";
+      }
+      currentPage = 1;
+      fetchAndRender();
+    }
+
+    // ── Main render ───────────────────────────────────────────────────────
+    function renderView() {
+      if (!activeView) return;
+
+      const meta = collections.find(c => c.name === activeView);
+      if (!meta) return;
+
+      const label = activeView.replace(/_/g," ").replace(/\b\w/g,c=>c.toUpperCase());
+
+      // Build controls row
+      const needsHero = meta.requiresHero;
+      const heroSel   = needsHero ? heroSelectorHTML(currentHeroFilter) : "";
+
+      mainContent.innerHTML = `
+        <div class="view-header">
+          <div>
+            <div class="view-title">${label}</div>
+            <div class="view-subtitle">${meta.count.toLocaleString()} total documents · ${meta.category}</div>
+          </div>
+          <div class="status" id="view-status"></div>
+        </div>
+        <div class="controls">
+          ${heroSel}
+          <input type="text" id="search-box" placeholder="Search…" oninput="onSearch(this.value)" />
+          <select id="sort-select" onchange="onSortSelect(this.value)">
+            <option value="">Sort by…</option>
+          </select>
+          <select id="order-select" onchange="onOrderSelect(this.value)">
+            <option value="desc">Desc</option>
+            <option value="asc">Asc</option>
+          </select>
+        </div>
+        <div class="table-wrapper" id="table-area">
+          ${needsHero && currentHeroFilter === null
+            ? `<div class="needs-filter">
+                <span style="font-size:1.8rem">🎯</span>
+                <span>Select a hero above to load data</span>
+                <span style="font-size:.75rem;color:#334155">This collection has ${meta.count.toLocaleString()} rows and requires a hero filter</span>
+              </div>`
+            : `<div class="state-msg"><span>Loading…</span></div>`
+          }
+        </div>
+        <div class="pagination" id="pagination"></div>
+      `;
+
+      if (!needsHero || currentHeroFilter !== null) {
+        fetchAndRender();
+      }
+    }
+
+    // Search is client-side on current page data
+    let pageData = [];
+    let searchQuery = "";
+
+    function onSearch(val) {
+      searchQuery = val.toLowerCase();
+      renderTable(pageData);
+    }
+
+    function onSortSelect(val) {
+      currentSort = val || null;
+      currentPage = 1;
+      fetchAndRender();
+    }
+
+    function onOrderSelect(val) {
+      currentOrder = val;
+      currentPage = 1;
+      fetchAndRender();
+    }
+
+    async function fetchAndRender() {
+      const tableArea = document.getElementById("table-area");
+      const viewStatus = document.getElementById("view-status");
+      if (!tableArea) return;
+
+      tableArea.innerHTML = `<div class="state-msg"><span>Loading…</span></div>`;
+      setStatus("loading", "Fetching...");
+
+      const params = new URLSearchParams({
+        page:  currentPage,
+        limit: 50,
+        order: currentOrder,
+      });
+      if (currentSort)        params.set("sort",    currentSort);
+      if (currentHeroFilter !== null) params.set("hero_id", currentHeroFilter);
+
+      try {
+        const r = await fetch(`/api/data/${activeView}?${params}`);
+        const d = await r.json();
+        if (!d.ok) throw new Error(d.error);
+
+        pageData   = d.data;
+        totalPages = d.pages;
+
+        // Populate sort selector with columns from first row
+        if (d.data.length > 0) {
+          const sortSel = document.getElementById("sort-select");
+          if (sortSel) {
+            const cols = Object.keys(d.data[0]);
+            sortSel.innerHTML = `<option value="">Sort by…</option>` +
+              cols.map(c => `<option value="${c}"${currentSort===c?" selected":""}>${colLabel(c)}</option>`).join("");
+          }
+        }
+
+        renderTable(d.data);
+        renderPagination(d.page, d.pages, d.total, d.count);
+        setStatus("ok", `${d.total.toLocaleString()} rows · page ${d.page}/${d.pages}`);
+        if (viewStatus) viewStatus.textContent = `${d.total.toLocaleString()} documents`;
+      } catch (err) {
+        tableArea.innerHTML = `<div class="state-msg"><span>Error: ${err.message}</span></div>`;
+        setStatus("error", "Query failed");
+      }
+    }
+
+    function renderTable(data) {
+      const tableArea = document.getElementById("table-area");
+      if (!tableArea) return;
+
+      const filtered = searchQuery
+        ? data.filter(row => Object.values(row).some(v => String(v).toLowerCase().includes(searchQuery)))
+        : data;
+
+      if (!filtered || filtered.length === 0) {
+        tableArea.innerHTML = `<div class="state-msg"><span>No results</span></div>`;
+        return;
+      }
+
+      try {
+        const cols = Object.keys(filtered[0]).filter(k => k !== "_id");
+
+        const thead = `<thead><tr>${cols.map(c => {
+          const sorted = currentSort === c;
+          const cls    = sorted ? ("sorted" + (currentOrder === "asc" ? " asc" : "")) : "";
+          return `<th class="${cls}" onclick="onSortClick('${c}')">${colLabel(c)}</th>`;
+        }).join("")}</tr></thead>`;
+
+        const tbody = filtered.map(row => {
+          const cells = cols.map(c => {
+            const v = row[c];
+            if (c === "win_rate" && typeof v === "number") {
+              return `<td>${winRateBar(v * 100)}</td>`;
+            }
+            const display = fmtCell(c, v);
+            return `<td title="${display}">${display}</td>`;
+          }).join("");
+          return `<tr>${cells}</tr>`;
+        }).join("");
+
+        tableArea.innerHTML = `<table>${thead}<tbody>${tbody}</tbody></table>`;
+      } catch (err) {
+        tableArea.innerHTML = `<div class="state-msg"><span>Render error: ${err.message}</span></div>`;
+        console.error("renderTable error:", err);
+      }
+    }
+
+    function renderPagination(page, pages, total, count) {
+      const el = document.getElementById("pagination");
+      if (!el) return;
+      if (pages <= 1) { el.innerHTML = ""; return; }
+
+      el.innerHTML = `
+        <button class="btn" onclick="goPage(1)"    ${page===1?"disabled":""}>«</button>
+        <button class="btn" onclick="goPage(${page-1})" ${page===1?"disabled":""}>‹</button>
+        <span class="page-info">Page ${page} of ${pages}</span>
+        <button class="btn" onclick="goPage(${page+1})" ${page===pages?"disabled":""}>›</button>
+        <button class="btn" onclick="goPage(${pages})"  ${page===pages?"disabled":""}>»</button>
+        <span style="color:#334155;font-size:.75rem">${total.toLocaleString()} total rows</span>
+      `;
+    }
+
+    function goPage(p) {
+      currentPage = p;
+      fetchAndRender();
+    }
+
+    // ── Init ──────────────────────────────────────────────────────────────
+    async function init() {
+      setStatus("loading", "Loading collections...");
+      try {
+        const [colRes] = await Promise.all([
+          fetch("/api/collections"),
+          loadHeroList(),
+        ]);
+        const colData = await colRes.json();
+        if (!colData.ok) throw new Error(colData.error);
+        collections = colData.collections;
+        buildSidebar();
+        setStatus("ok", "Ready");
+      } catch (err) {
+        setStatus("error", "Failed to load: " + err.message);
+        sidebar.innerHTML = `<div class="state-msg" style="padding:1rem;font-size:.75rem;color:#ef4444">Error: ${err.message}</div>`;
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>
