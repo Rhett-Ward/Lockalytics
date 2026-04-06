@@ -242,8 +242,8 @@ Per-player match history. Fetched with `only_stored_history=True` to stay within
 lockalytics/
 ├── fetch_and_store_4.py     # Ingestion script
 ├── spark_process1.py       # Spark processing script
-├── server1.js              # Express web server
-├── heroes1.html            # Dashboard
+├── server.js              # Express web server
+├── heroes.html            # Dashboard
 ├── requirements.txt        # Python deps
 ├── package.json            # Node deps
 ```
