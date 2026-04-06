@@ -1,0 +1,10 @@
+AZURE_STORAGE_ACCOUNT_NAME=your_account_name
+AZURE_STORAGE_ACCOUNT_KEY=your_key_here
+AZURE_CONTAINER_NAME=deadlock-data
+AZURE_CONNECTION_STRING=your_connection_string_here
+
+MONGO_URI=mongodb://username:password@127.0.0.1:27017/?authSource=lockalytics
+MONGO_DB_NAME=lockalytics
+MONGO_COLLECTION=hero_stats
+
+PORT=3000
