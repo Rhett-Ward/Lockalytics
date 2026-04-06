@@ -1,132 +1,346 @@
 # Lockalytics
-School project Big Data Deadlock api and meta analytics
+Big data analytics pipeline and live dashboard for the game Deadlock (Valve), built for CS 4265: Big Data Analytics at KSU.
+
+Pulls from the community Deadlock API, stores raw JSON in Azure Blob Storage, processes it with PySpark, loads results into a self-hosted MongoDB instance, and serves it through a web dashboard that auto-refreshes every 30 seconds.
+
+**Live dashboard:** `lockalytics.tech`
+
+DISCLAIMER: Readability of data is still very actively being worked on, it is being processed and moved and sorted and transfered but somethings like hero and ability ID's are still in the process of being written over the actual number.
+
+---
+
+## Table of Contents
+- [How It Works](#how-it-works)
+- [Requirements](#requirements)
+- [Setup](#setup)
+- [Running It](#running-it)
+- [Data Dictionary](#data-dictionary)
+- [Project Structure](#project-structure)
+- [Progress Reports](#progress-reports)
+
+---
+
+## How It Works
+
+```
+[Deadlock Community API]
+         │
+         │  fetch_and_store_4.py  (cron: every 15 min)
+         ▼
+[Azure Blob Storage — ADLS Gen2]
+  raw/{endpoint_name}/YYYY/MM/DD/HHMMSS.json
+         │
+         │  spark_process1.py  (cron: every 20 min)
+         ▼
+[MongoDB 7.0 — self-hosted on VPS]
+  db: lockalytics  |  14+ collections
+         │
+         ▼
+[Express — server1.js, port 3000]
+         │
+         ▼
+[heroes1.html — live dashboard]
+```
+
+`fetch_and_store_4.py` runs in 6 beats covering the Deadlock API: global analytics, per-hero analytics, builds, match metadata, scoreboards, and player data. Each response gets wrapped in a JSON envelope with a timestamp and record count and uploaded to Azure. `spark_process1.py` then reads those blobs, aggregates or flattens the data depending on the endpoint, and overwrites the corresponding MongoDB collection. The Express server reads from MongoDB and the dashboard polls it on a 30-second interval.
+
+The whole thing runs on a Hostinger VPS (Ubuntu 22.04) managed with PM2 for the web server and cron for the two Python scripts. (also using cron to restart the pm2 server at a 30 minute interval for hosting health)
+
+---
+
+## Requirements
+
+The deployed version is already running continuously, so you only need this if you want to run your own instance.
+
+- **Python 3.10+**
+- **Java 11** -- required by Spark (`sudo apt install openjdk-11-jdk`)
+- **Apache Spark 3.5.x** with bundled Hadoop 3.3 -- [download here](https://spark.apache.org/downloads.html), extract to `/opt/spark`
+- **Azure Storage Account** (ADLS Gen2) -- you'll need your own account, key, and connection string
+- **MongoDB 7.0** -- self-hosted or Atlas both work, just update the URI in `.env`
+- **Node.js v20+** -- recommend installing via [nvm](https://github.com/nvm-sh/nvm)
+
+---
+
+## Setup
+
+### Step 1 -- Clone the repo and set up a virtual environment
+
+```bash
+git clone https://github.com/Rhett-Ward/Lockalytics.git
+cd lockalytics
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+### Step 2 -- Configure your `.env`
+
+Copy the example file and fill in your credentials:
+
+```bash
+cp .env.example .env
+```
+
+```env
+AZURE_STORAGE_ACCOUNT_NAME=your_account_name
+AZURE_STORAGE_ACCOUNT_KEY=your_key_here
+AZURE_CONTAINER_NAME=deadlock-data
+AZURE_CONNECTION_STRING=your_connection_string_here
+
+MONGO_URI=mongodb://username:password@127.0.0.1:27017/?authSource=lockalytics
+MONGO_DB_NAME=lockalytics
+MONGO_COLLECTION=hero_stats
+
+PORT=3000
+```
+
+The `?authSource=lockalytics` on the Mongo URI matters if your user was created inside the `lockalytics` database rather than `admin`. If you set it up differently, adjust accordingly.
+
+### Step 3 -- Spark environment variables
+
+Add these to your shell profile or just export them before running:
+
+```bash
+export SPARK_HOME=/opt/spark
+export PATH=$SPARK_HOME/bin:$PATH
+export PYSPARK_PYTHON=~/lockalytics/venv/bin/python
+export PYSPARK_DRIVER_PYTHON=~/lockalytics/venv/bin/python
+```
+
+The `PYSPARK_PYTHON` lines are important. Without them Spark will use the system Python and immediately fail on missing imports.
+
+### Step 4 -- Azure connector JARs
+
+Spark pulls the MongoDB connector automatically via `--packages` on first run. The Azure JARs need to be placed in `$SPARK_HOME/jars/` manually:
+
+- `hadoop-azure-3.3.4.jar`
+- `azure-storage-8.6.6.jar`
+- `wildfly-openssl-1.0.7.Final.jar`
+
+### Step 5 -- Node dependencies
+
+```bash
+npm install
+```
+
+---
+
+## Running It
+
+### Ingestion
+
+```bash
+source venv/bin/activate
+python fetch_and_store_4.py
+```
+<img width="950" height="895" alt="image" src="https://github.com/user-attachments/assets/8cc8efbc-d163-4477-8ca8-abe67ae0aa89" />
+
+Runs through all 6 phases and logs `OK`, `SKIP`, or `FAIL` per endpoint to stdout. A full run takes a few minutes depending on how many matches and accounts get discovered in the match metadata phase.
+
+### Spark
+
+```bash
+spark-submit \
+  --packages org.mongodb.spark:mongo-spark-connector_2.12:10.3.0 \
+  spark_process.py
+```
+
+<img width="770" height="650" alt="image" src="https://github.com/user-attachments/assets/07584bda-1fdc-4f45-aeb7-cd725f778ce8" />
 
 
-This is a big data attempt to process live amatch data to keep an update analytics website(UI) thats interactable and filterable and provides up to date analysis. It will use HDFS, MongoDB, Apache Spark, and both the steam api and the community made deadlock api.
+Loops through all endpoint folders in blob storage, processes each one, and writes to the corresponding MongoDB collection. Endpoints with no blob data yet are skipped without crashing the run.
 
-# "Table of contents"
-- [Requirements](#Requirements)
-- [Setup / Instructions](#Instructions)
-- [Progress Reports](#Progress-Reports)
+### Web server
 
+```bash
+pm2 start server.js --name lockalytics-web2
 
-# Requirements
+# or if it's already running
+pm2 restart lockalytics-web2 --update-env
+```
+to boot up webserver if you want to host a web based endpoint
 
-- [Docker Desktop](https://docs.docker.com/desktop/) Needed for deploying the HDFS server
-  - [Windows Installer](https://docs.docker.com/desktop/setup/install/windows-install/)
-  - [Mac Installer](https://docs.docker.com/desktop/setup/install/mac-install/)
-  - [Linux Installer](https://docs.docker.com/desktop/setup/install/linux/)
-- [Mongo DB Instance](https://www.mongodb.com/products/platform/atlas-database) You'll need to set one up if you want to run it yourself. [Step by step guide on setting it up](###Step-4)
-- Node.js / NPM It is very likely that you already have NPM installed if your on windows but just in case you dont
- - [Instructions on how to install NPM](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) 
-- Python3 Its very likely you already have python installed but in case you dont
- - [Python for Windows](https://www.python.org/downloads/windows/) Click on the Installer (MSIX) of the most recent stable version
- - [Python for MAC](https://www.python.org/downloads/macos/) Click on the Installer of the most recent stable version
- - [Python for Linux](https://www.python.org/downloads/source/) Might be easier to just do `sudo apt install python3` 
-- [Hadoop Zip File](https://github.com/Rhett-Ward/Lockalytics/blob/8e126bdee4f8e16646d5d8667e53285cb9bf8f33/src/Hadoop%20HDFS.zip)
-- Batch File - If you are willing to run this on your computer you can see everything in action (code is mostly readable even if unknowledgeable, its completely safe but feel free to open it in notepad to check it out)
+### Cron setup
 
-# Instuctions
-## Here is a step by step guide of how to get it all going
+```
+*/15 * * * * /root/lockalytics/venv/bin/python /root/lockalytics/fetch_and_store_4.py
 
-### Step 1
-Download and install all the requirements
+*/20 * * * * /root/lockalytics/spark-submit --driver-memory 4g --conf spark.sql.shuffle.partitions=10 --packages org.mongodb.spark:mongo-spark-connector_2.12:10.3.0 spark_process.py
+```
+For if you want to automate it yourself
+---
 
-### Step 2
-Open Docker Desktop and sign in / create an account if you haven't already
+## Data Dictionary
 
-### Step 3
-Make sure you can see this in the bottom left of your docker desktop window
+All collections live in the `lockalytics` MongoDB database. Every raw blob in Azure uses the same wrapper format before Spark processes it:
 
-<img src="https://media.discordapp.net/attachments/723371382091546645/1480376147123638424/image.png?ex=69af7339&is=69ae21b9&hm=2a13eff637cd81e5eb9e9825346dd9da79bdf140b5a5bcc54bfe1b63f6b4ecd1&=&format=webp&quality=lossless&width=138&height=30" alt="Engine Running Symbol" width=300 height=300>
+```json
+{
+  "fetched_at": "2026-04-05T10:00:00+00:00",
+  "endpoint":   "hero_stats",
+  "record_count": 62,
+  "data": [ ... ]
+}
+```
 
-### Step 4 
-create a MongoDB Cluster (Project used for screenshots was deleted shortly after, password left uncensored since it no longer correlates to anything, this cluster can't be accessed.)
+### hero_stats
 
-- Step 1
-  - Create a free account and sign in
-- Step 2
-  - Create a project
-  - <img width="900" height="600" alt="image" src="https://github.com/user-attachments/assets/084f54f2-b237-4174-972a-70e3da7ece91" />
-  - <img width="480" height="480" alt="image" src="https://github.com/user-attachments/assets/2abeffe2-3392-43ef-9075-a782ea4899df" />
-  - <img width="480" height="480" alt="image" src="https://github.com/user-attachments/assets/8f312098-e13a-4c30-86bf-e369c4f36ea0" />
-- Step 3
-  - Create a Cluster
-  - <img width="900" height="600" alt="image" src="https://github.com/user-attachments/assets/057e73e3-0f7b-4665-b27c-1a22d84cd379" />
-  - <img width="900" height="600" alt="image" src="https://github.com/user-attachments/assets/b9127986-9f78-4b1e-b580-2ade6a08c9ce" />
-    - Provider doesn't matter here
-- Step 4
-  - Connect to your cluster
-    - <img width="480" height="480" alt="image" src="https://github.com/user-attachments/assets/c083a62e-bb83-44e5-b057-6b10aecb8869" />
-    - <img width="480" height="480" alt="image" src="https://github.com/user-attachments/assets/7d893298-e246-468b-bd15-e6a91f306910" />
-- Step 5
-  - Copy your connection strings into the appropriate files.
-    - Python
-      - <img width="900" height="600" alt="image" src="https://github.com/user-attachments/assets/73ff6291-4459-48f6-8e6f-b91ba862addf" />
-      - Copy your version of this string into the below segment of "Testing File.py"
-      - <img width="900" height="300" alt="image" src="https://github.com/user-attachments/assets/fc720439-5035-4045-aa5b-1d932a5d626c" />
-    - Node.js
-      - <img width="900" height="600" alt="image" src="https://github.com/user-attachments/assets/17b81e14-61da-4c7c-875c-5a8a54354b88" />
-      - Copy your version of this string into the below segment of "Node.js" inside the [Hadoop Zip File](https://github.com/Rhett-Ward/Lockalytics/blob/8e126bdee4f8e16646d5d8667e53285cb9bf8f33/src/Hadoop%20HDFS.zip)
-      - <img width="900" height="300" alt="image" src="https://github.com/user-attachments/assets/5afeb1e8-8d5a-49f2-acfb-92613ce25b8c" />
+Aggregated across all fetch runs. Spark groups by `hero_id` and sums wins/losses/matches rather than storing a raw snapshot each time.
 
-### Step 5
-Edit the directory of the virtual environment in the batch file
+| Field | Type | Description |
+|---|---|---|
+| `hero_id` | int | Hero identifier from the Deadlock API |
+| `total_wins` | long | Wins summed across all fetched snapshots |
+| `total_losses` | long | Losses summed across all fetched snapshots |
+| `total_matches` | long | Total matches |
+| `win_rate` | double | `total_wins / total_matches`, 4 decimal places |
+| `last_updated` | string | ISO 8601 timestamp of the most recent contributing fetch |
 
-<img width="1016" height="53" alt="image" src="https://github.com/user-attachments/assets/b56d53cb-6369-47c0-9c5d-e2a02ee84cf8" />
+### item_stats
 
-### Step 6
-Run the batch file!
+Same aggregation as `hero_stats`, keyed on items instead.
 
-Run it multiple times over a few minutes to see proof that the html file is actually pulling _id from your cluster
+| Field | Type | Description |
+|---|---|---|
+| `item_id` | int | Item identifier |
+| `total_wins` | long | Wins summed across all snapshots |
+| `total_losses` | long | Losses summed |
+| `total_matches` | long | Total matches |
+| `win_rate` | double | `total_wins / total_matches`, 4 decimal places |
+| `last_updated` | string | Timestamp of most recent contributing fetch |
+
+### bulk_metadata / match_metadata
+
+`bulk_metadata` is the top-level batch response from the API. `match_metadata` is the per-match drill-down fetched for each discovered `match_id`. Both go through the generic flatten path in Spark.
+
+| Field | Type | Description |
+|---|---|---|
+| `match_id` | int | Unique match identifier |
+| `players` | array | Player objects containing `account_id` and per-player stats |
+| `fetched_at` | string | Fetch timestamp |
+
+### match_history
+
+Per-player match history. Fetched with `only_stored_history=True` to stay within the free API rate limits. `account_id` is injected by the ingestion script since the discovery happens in the match metadata phase.
+
+| Field | Type | Description |
+|---|---|---|
+| `account_id` | int | Player account ID |
+| `match_id` | int | Match this record belongs to |
+| `hero_id` | int | Hero the player used |
+| `fetched_at` | string | Fetch timestamp |
+
+### Everything else
+
+`hero_counter_stats`, `hero_synergy_stats`, `hero_comb_stats`, `badge_distribution`, `kill_death_stats`, `player_performance_curve`, `player_stat_metrics`, `ability_order_stats`, `build_item_stats`, `search_builds`, `hero_scoreboard`, and `player_scoreboard` all go through the generic Spark path: the `data` array gets exploded into one row per record and struct fields get promoted to top-level columns. Field names come through from the API response as-is.
+
+---
+
+## Project Structure
+
+```
+lockalytics/
+├── fetch_and_store_4.py     # Ingestion script
+├── spark_process1.py       # Spark processing script
+├── server1.js              # Express web server
+├── heroes1.html            # Dashboard
+├── .env                    # Credentials (not committed)
+├── .env.example            # Template
+├── requirements.txt        # Python deps
+├── package.json            # Node deps
+└── logs/
+    ├── ingest.log
+    └── spark.log
+```
+
+---
 
 # Progress Reports
 
 2/16/2026-
+
 First successful api call from Deadlock community API
+
 Exported data call to a csv file via python and created a google sheets script to begin converting some data to be readable and consumable.
+
 worked with api dev to spot some bugs.
+
 emailed prof for rescoping advice.
 
 2/24/2026-
+
 got a test db running using atlas
+
 modified my existing python api test script to access said db cluster and add data as a collection
+
 successfully imported csv of hero stats into cluster from python script
 
 3/3/2026
+
 deployed a hadoop hdfs docker container and began learning how to interact with it.
+
 next steps:
+
 setup apache spark to stream from api (first iteration might just be making calls on a timer or making a call with pyspark at all)
+
 Attached HDFS container to AZUR blob storage
+
 create mongodb atlas instance through azure that is linked to that blob storage
+
 rewrite project statement
 
 3/6/2026
+
 made a batch script that connects everything together, has requirements in it, can auto install just about everything (just need docker, npm, and python before hand) and does all the work
+
 the end result is a hdfs and mongo db cluster that host a csv and a website that pulls from it and is created inside of a node js script. have to figure out how to upload it all to github due to data limits. 
+
 have to write report still
+
 have to figure out what can and cant be uploaded (like atlas db key)
 
 3/8/2026
+
 Finished Initial implementation report. Did read me write up. Refactored batch file to run for anyone and not use specifics for my pc.
 
 3/19/2026
+
 Beginning full transitional process to automation and fully online hosting.
+
 Purchased server to host the python script, the web app, the mongodb
+
 Setup Azure blob storage to be the HDFS moving away from docker
+
 Setup self hosted mongodb instance as opposed to using Atlas for size and cost reasons.
+
 worked through lots of debugging. Got first set of raw data into Azure container.
+
 got a sample express server up and running as a tester. 
+
 started working on spark implementation in order to process data out of azure and into the self hosted mongodb instance.
+
 started reworking python fetch script. to do: change dump location to azure blob rather then to mongo DB
 
 4/4/2026
+
 Completely debugged spark test pipeline thing. Was able to properly prove transfer into mongodb and from there into azure.
+
 These issues included but not limited to: Running system python instead of venv python instance and therefore missing dependencies, Misspelled credentials, poor file search.
 
 04/05/2026
+
 Refactoring github to prepare for full upload of project and submission.
+
 Changing python fetch and store script to fetch and store many api calls at once rather then just one (functionality tested across the board just needs to be implemented together)
+
+setting up cron
+
+finished spark_process1.py to match with the new collections
+
+got to test and debug new server.js implementation (meant to put this in on 03/27/26 but I went back and redid the server.js and heroes.html to match the fields I planned on implementing.)
+
+wrote report.
+
 
 
 
