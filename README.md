@@ -133,7 +133,8 @@ npm install
 source venv/bin/activate
 python fetch_and_store_4.py
 ```
-<img width="950" height="895" alt="image" src="https://github.com/user-attachments/assets/8cc8efbc-d163-4477-8ca8-abe67ae0aa89" />
+<img width="761" height="406" alt="image" src="https://github.com/user-attachments/assets/fd0ecdd9-66d8-4b98-90c6-6d7d40a1f9e8" />
+
 
 Runs through all 6 phases and logs `OK`, `SKIP`, or `FAIL` per endpoint to stdout. A full run takes a few minutes depending on how many matches and accounts get discovered in the match metadata phase.
 
