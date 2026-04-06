@@ -144,7 +144,8 @@ Runs through all 6 phases and logs `OK`, `SKIP`, or `FAIL` per endpoint to stdou
 spark-submit --driver-memory 4g --conf spark.sql.shuffle.partitions=10 --packages org.mongodb.spark:mongo-spark-connector_2.12:10.3.0 spark_process.py
 ```
 
-<img width="770" height="650" alt="image" src="https://github.com/user-attachments/assets/07584bda-1fdc-4f45-aeb7-cd725f778ce8" />
+<img width="618" height="308" alt="image" src="https://github.com/user-attachments/assets/3d02a40e-3e1c-4010-afdc-e3ea5ff84d04" />
+
 
 
 Loops through all endpoint folders in blob storage, processes each one, and writes to the corresponding MongoDB collection. Endpoints with no blob data yet are skipped without crashing the run.
